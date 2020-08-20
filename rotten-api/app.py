@@ -1,7 +1,7 @@
 import urllib.error
 
 from PIL import ImageTk, Image
-from tkinter import Tk, Frame, Label, Entry, Button, PhotoImage, Scrollbar, Text, RIGHT, LEFT, Y, END
+from tkinter import Tk, Frame, Label, Entry, Button, PhotoImage, Scrollbar, Text, RIGHT, LEFT, TOP, Y, END
 from tkinter.font import Font
 
 from rotten import Rotten
@@ -21,17 +21,17 @@ class App:
         self.movie_search_frame.grid(row=0, column=0, padx=10, sticky="N")
 
         self.movie_info_frame = Frame(self.window, bg=self.background_color)
-        self.movie_info_frame.grid(row=0, column=1, padx=(50, 0))
+        self.movie_info_frame.grid(row=0, column=1, padx=(35, 20))
 
         self.movie_cast_frame = Frame(self.window, bg=self.background_color)
-        self.movie_cast_frame.grid(row=0, column=2)
+        self.movie_cast_frame.grid(row=0, column=2, pady=(20, 0))
 
-        self.cast_scroll = Scrollbar(self.movie_cast_frame, orient="vertical")
-        
+        self.movie_cast_label = Label(self.movie_cast_frame, text="Movie cast", bg=self.background_color)
+
+        self.cast_scroll = Scrollbar(self.movie_cast_frame, orient="vertical")        
 
         self.movie_cast_text = Text(self.movie_cast_frame, yscrollcommand=self.cast_scroll.set)
-        self.movie_cast_text.configure(width=35, bg=self.background_color)
-        
+        self.movie_cast_text.configure(width=35, height=22, bg=self.background_color)
 
         self.cast_scroll.config(command=self.movie_cast_text.yview)
 
@@ -93,10 +93,13 @@ class App:
 
             self.audience_rating_label["text"] = f"Audience rating: {movie.audience_rating_value.strip()}"
 
-            fonte = Font(size=12, weight="bold")
-            self.movie_name_label["font"] = fonte
+            movie_name_font = Font(size=12, weight="bold")
+            self.movie_name_label["font"] = movie_name_font
             self.movie_name_label["text"] = movie.movie_name
 
+            movie_cast_label_font = Font(size=10, weight="bold")
+            self.movie_cast_label["font"] = movie_cast_label_font
+            self.movie_cast_label.pack(side=TOP, anchor="w")
             self.cast_scroll.pack(side=RIGHT, fill=Y)
             self.movie_cast_text.pack(side=LEFT)
             self.organize_cast(movie.movie_cast)
