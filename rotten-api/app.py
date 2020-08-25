@@ -21,17 +21,29 @@ class App:
         self.movie_search_frame.grid(row=0, column=0, padx=10, sticky="N")
 
         self.movie_info_frame = Frame(self.window, bg=self.background_color)
-        self.movie_info_frame.grid(row=0, column=1, padx=(35, 20))
+        self.movie_info_frame.grid(row=0, column=1, padx=(20, 20), rowspan=10)
 
         self.movie_cast_frame = Frame(self.window, bg=self.background_color)
-        self.movie_cast_frame.grid(row=0, column=2, pady=(20, 0))
+        self.movie_cast_frame.grid(row=1, column=0, padx=10, sticky="N")
+
+        self.movie_synopsis_frame = Frame(self.window, bg=self.background_color)
+        self.movie_synopsis_frame.grid(row=0, column=2, rowspan=10, pady=10)
+
+        self.movie_synopsis_label = Label(self.movie_synopsis_frame, text="Synopsis", bg=self.background_color)
+
+        self.synopsis_scroll = Scrollbar(self.movie_synopsis_frame, orient="vertical")
+
+        self.movie_synopsis_text = Text(self.movie_synopsis_frame, yscrollcommand=self.synopsis_scroll.set)
+        self.movie_synopsis_text.configure(width=30, height=25, bg=self.background_color)
+
+        self.synopsis_scroll.configure(command=self.movie_synopsis_text.yview)
 
         self.movie_cast_label = Label(self.movie_cast_frame, text="Movie cast", bg=self.background_color)
 
         self.cast_scroll = Scrollbar(self.movie_cast_frame, orient="vertical")        
 
         self.movie_cast_text = Text(self.movie_cast_frame, yscrollcommand=self.cast_scroll.set)
-        self.movie_cast_text.configure(width=35, height=22, bg=self.background_color)
+        self.movie_cast_text.configure(width=30, height=20, bg=self.background_color)
 
         self.cast_scroll.config(command=self.movie_cast_text.yview)
 
@@ -44,9 +56,9 @@ class App:
         self.movie_name_entry = Entry(self.movie_search_frame)
         self.movie_name_entry.grid(row=1, column=1, sticky="W")
 
-        self.search_movie_button = Button(self.movie_search_frame, text="Search", width=10)
+        self.search_movie_button = Button(self.movie_search_frame, text="Search")
         self.search_movie_button["command"] = lambda: self.movie_searcher()
-        self.search_movie_button.grid(row=2, column=0, pady=3, columnspan=3)
+        self.search_movie_button.grid(row=1, column=2, pady=3, columnspan=3)
 
 
         self.movie_name_label = Label(self.movie_info_frame, bg=self.background_color)
@@ -74,8 +86,15 @@ class App:
         self.movie_cast_text.delete(1.0, END)
 
         for name in cast_names:
-            self.movie_cast_text.insert(END, f"{name}: {cast[name]}\n")
+            self.movie_cast_text.insert(END, f"{name}: {cast[name]}\n\n")
         self.movie_cast_text["state"] = "disabled"
+
+    def write_synopsis(self, synopsis):
+        self.movie_synopsis_text["state"] = "normal"
+        self.movie_synopsis_text.delete(1.0, END)
+
+        self.movie_synopsis_text.insert(END, synopsis)
+        self.movie_synopsis_text["state"] = "disabled"
 
     def movie_searcher(self):
     
@@ -103,6 +122,12 @@ class App:
             self.cast_scroll.pack(side=RIGHT, fill=Y)
             self.movie_cast_text.pack(side=LEFT)
             self.organize_cast(movie.movie_cast)
+
+            self.movie_synopsis_label["font"] = movie_cast_label_font
+            self.movie_synopsis_label.pack(side=TOP, anchor="w")
+            self.synopsis_scroll.pack(side=RIGHT, fill=Y)
+            self.movie_synopsis_text.pack(side=LEFT)
+            self.write_synopsis(movie.movie_synopsis.strip())
 
             im = Image.open(movie.movie_poster)
             imtk = ImageTk.PhotoImage(im)
