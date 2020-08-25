@@ -2,9 +2,10 @@ import urllib.request
 from bs4 import BeautifulSoup
 
 class Rotten:
-    def __init__(self):
+    def __init__(self, timeout=2):
         self.base_link = "https://www.rottentomatoes.com"
-    
+        self.timeout = timeout
+
     def split_name(self, name):
         return name.split(" ")
 
@@ -23,7 +24,7 @@ class Rotten:
 
     def open_link(self, movie_name):
         formated_name = self.format_name_to_link(movie_name)
-        return urllib.request.urlopen(f"{self.base_link}/m/{formated_name}")
+        return urllib.request.urlopen(f"{self.base_link}/m/{formated_name}", timeout=self.timeout)
 
     def get_page(self, movie_name):
         return BeautifulSoup(self.open_link(movie_name), features="html.parser")
@@ -169,5 +170,4 @@ class Rotten_movie:
         organized_array[3] = right_genre
         info_dict = self.dictionary_info_generator(organized_array)
         
-        print(info_dict)
         return info_dict
