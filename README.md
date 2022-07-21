@@ -6,4 +6,4 @@ In app.py you can find a little example with a GUI made in tkinter.
 
 Please enjoy and fell free to give constructive notes.
 
-![Alt text](https://github.com/Felipe-Pedro/Web-Scraper/blob/master/rotten-api/example.png "Example")
+![Alt text](https://github.com/Felipe-Pedro/Web-Scraper/blob/main/example.png "Example")
