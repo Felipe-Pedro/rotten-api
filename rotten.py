@@ -6,25 +6,11 @@ class Rotten:
         self.base_link = "https://www.rottentomatoes.com"
         self.timeout = timeout
 
-    def split_name(self, name):
-        return name.split(" ")
-
-    def format_name_to_link(self, movie_name):
-        formated_name = ""
-        name_splited = self.split_name(movie_name)
-
-        for name_part in name_splited:
-            formated_name += name_part
-
-            if name_splited.index(name_part) >= len(name_splited) - 1: #If it is the last name part in array
-                break                                                 #it will not put _ after the name part
-            formated_name += "_"
-    
-        return formated_name
+    def format_link(self, movie_name):
+        return self.base_link + "/m/" + "_".join(movie_name.split(" "))
 
     def open_link(self, movie_name):
-        formated_name = self.format_name_to_link(movie_name)
-        return urllib.request.urlopen(f"{self.base_link}/m/{formated_name}", timeout=self.timeout)
+        return urllib.request.urlopen(self.format_link(movie_name), timeout=self.timeout)
 
     def get_page(self, movie_name):
         return BeautifulSoup(self.open_link(movie_name), features="html.parser")
