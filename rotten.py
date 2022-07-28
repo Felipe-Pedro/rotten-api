@@ -53,8 +53,6 @@ def _roles(movie_name):
 def get_movie_cast(movie_name):
     movie_page = get_movie_page(movie_name)
 
-    cast = {
+    return {
         actor: role for actor, role in zip(get_movie_actors(movie_page), _roles(movie_page))
     }
-
-    print(cast)
