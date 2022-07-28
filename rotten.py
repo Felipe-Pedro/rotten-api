@@ -1,159 +1,60 @@
-import urllib.request
+from urllib import request
 from bs4 import BeautifulSoup
 
-class Rotten:
-    def __init__(self, timeout=2):
-        self.base_link = "https://www.rottentomatoes.com"
-        self.timeout = timeout
+def format_link(movie_name):
+    return "https://www.rottentomatoes.com/m/" + "_".join(movie_name.split(" "))
 
-    def format_link(self, movie_name):
-        return self.base_link + "/m/" + "_".join(movie_name.split(" "))
+def open_link(movie_name, timeout=2):
+    return request.urlopen(format_link(movie_name), timeout=timeout)
 
-    def open_link(self, movie_name):
-        return urllib.request.urlopen(self.format_link(movie_name), timeout=self.timeout)
+def get_movie_page(movie_name):
+    return BeautifulSoup(open_link(movie_name), features="html.parser")
 
-    def get_page(self, movie_name):
-        return BeautifulSoup(self.open_link(movie_name), features="html.parser")
+def get_movie_score(movie_name):
+    movie_info = get_movie_page(movie_name, ).find('score-board')
 
-    def search_movie(self, movie_name):
-        try:
-            return Rotten_movie(self.get_page(movie_name))
-        except urllib.error.HTTPError:
-            return Rotten_movie(None)
+    return (movie_info['audiencescore'], movie_info['tomatometerscore'])
 
-class Rotten_movie:
-    def __init__(self, page):
-
-        self.page = page
-        self.rotten_rating_value = self.get_rotten_rating()
-        self.audience_rating_value = self.get_audience_rating()
-        self.movie_name = self.get_movie_name()
-        self.movie_cast = self.get_movie_cast()
-        self.movie_poster = self.get_movie_poster()
-        self.movie_synopsis = self.get_movie_synopsis()
-        self.movie_info = self.get_movie_info()
-
-    def try_get_info(self, tag, attributes, string=True, html=None):
-        if html is None:
-            html = self.page
-        try:
-            if string:
-                return html.find(tag, attrs=attributes).string
-            return html.find(tag, attrs=attributes)
-        except AttributeError:
-            return 0
-
-    def get_rotten_rating(self):
-        return self.try_get_info('span', {'class': 'mop-ratings-wrap__percentage'})
+def get_movie_actors(movie_name):
+    movie_page = get_movie_page(movie_name) if type(movie_name) != type(BeautifulSoup()) else movie_name
+    actors_link = movie_page.find_all('span', class_='characters subtle smaller')
     
-    def get_audience_rating(self):
-        audience_div = self.try_get_info('div', {'class': 'audience-score'}, string=False)
-        return self.try_get_info('span', {'class': 'mop-ratings-wrap__percentage'}, html=audience_div)
+    return [ actor['title'] for actor in actors_link ]
 
-    def get_movie_name(self):
-        return self.try_get_info('h1', {'class': 'mop-ratings-wrap__title mop-ratings-wrap__title--top'})
-
-    def get_cast_div(self):
-        return self.try_get_info('div', {'class': 'castSection'}, string=False)
-
-    def dictionary_generator(self, array):
-            dictionary = {}
-            for i in range(0, len(array), 2):
-                dictionary[array[i]['title']] = array[i+1]['title']
-            return dictionary
-
-    def get_movie_cast(self):
-        try:
-            cast_div = self.get_cast_div()
-            
-            cast_name_span = cast_div.find_all('span')
-            cast_name_span.pop()
-
-            cast_name = self.dictionary_generator(cast_name_span)
-            
-            return cast_name
-        except AttributeError:
-            return 0
-
-    def get_movie_poster(self):
-        image_link = self.try_get_info('img', {'class': 'posterImage js-lazyLoad'}, string=False)
-        if image_link == 0:
-            return 0
-
-        return urllib.request.urlretrieve(image_link["data-src"])[0]
-
-    def get_movie_synopsis(self):
-        return self.try_get_info('div', {'id': 'movieSynopsis'})
-
-    def dictionary_info_generator(self, array):
-        dictonary = {}
-        for i in range(0, len(array), 2):
-            dictonary[array[i]] = array[i+1]
-        return dictonary 
+def _sanatize(input):
+    if '\n' not in input:
+        return input
     
-    def check_item_type(self, item):
-        if type(item) == type([]):
-            return True
-        return False
+    clean_pieces = []
 
-    def strip_item(self, item):
-        for i in range(0, 3):
-            item = item.strip()
-        return item
-
-    def movie_info_organizer(self, array):
+    for piece in input.split('\n '):
+        clean_piece = piece.strip('\n ,')
         
-        organized_array = []
+        if not clean_piece:
+            continue
         
-        for info in array:
-            organized_array.append(info) if self.check_item_type(info) else organized_array.append(self.strip_item(info))
-        return organized_array
+        clean_pieces.append(clean_piece)
 
-    def get_info_list(self):
-        info_div = self.try_get_info('ul', {'class': 'content-meta info'}, string=False)
-        if info_div == 0:
-            return 0
-        return info_div.find_all('li', attrs={'class': 'meta-row clearfix'})
+    return clean_pieces
 
-    def organize_genre(self, genre):
-        gender_array = []
-        genre_splited = genre.split(" ")
-        for genre in genre_splited:
-            if genre != "" and genre != "\n" and genre != "&":
-                genre = genre.strip(",")
-                gender_array.append(genre)
+def _roles(movie_name):
+    movie_page = get_movie_page(movie_name) if type(movie_name) != type(BeautifulSoup()) else movie_name
+    caracters_link = movie_page.find_all('span', class_='characters subtle smaller')
+    
+    caracters_stripped_strings = [ string.stripped_strings for string in caracters_link ]
 
-        return gender_array
+    roles = []
 
-    def get_movie_info(self):
-        info_list = self.get_info_list()
+    for string in caracters_stripped_strings:
+        roles.append([ _sanatize(sr) for sr in string ])
 
-        if info_list == 0:
-            return 0
+    return roles
 
-        info_array = []
+def get_movie_cast(movie_name):
+    movie_page = get_movie_page(movie_name)
 
-        for info in info_list:
-            info_value = info.find('div', attrs={'class': 'meta-value'})
-            
-            info_array.append(info.find('div', attrs={'class': 'meta-label subtle'}).string)
+    cast = {
+        actor: role for actor, role in zip(get_movie_actors(movie_page), _roles(movie_page))
+    }
 
-            if info_value.string is not None:
-                info_array.append(info_value.string)
-                
-            if info_value.find('time') is not None:
-                info_array.append(info_value.find('time').string)
-
-            if info_value.find('a') is not None:
-                name_array = []
-                for info2 in info_value.find_all('a'):
-                    name_array.append(info2.string)
-                info_array.append(name_array)
-        
-        organized_array = self.movie_info_organizer(info_array)
-        
-        right_genre = self.organize_genre(organized_array[3])
-        organized_array[3] = right_genre
-        info_dict = self.dictionary_info_generator(organized_array)
-        
-        return info_dict
+    print(cast)
