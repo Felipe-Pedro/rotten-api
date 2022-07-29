@@ -22,20 +22,24 @@ All functions, except ```open_link(movie_name)``` and ```get_movie_page(movie_na
 
 ### ```open_link(movie_name, timeout=2)```
 ```movie_name```: A string containing the movie's name which you want to get the data from.
+
 ```timeout=2```: The time it will wait for a response from the server.
 
 It makes a request to the Rotten Tomatoes server and returns the movie's html page.
 
 ### ```get_movie_page(movie_name)```
 ```movie_name```: A string containing the movie's name which you want to get the data from.
+
 ```return ```: a BeautifulSoup object containing the Rotten movie's page
 
 ### ```get_movie_score(movie_name)```
 ```movie_name```: A string containing the movie's name which you want to get the data from, or a BeautifulSoup object.
+
 ```return ```: A tuple containing the audience and rotten score, in that order
 
 ### ```get_movie_cast(movie_name)```
 ```movie_name```: A string containing the movie's name which you want to get the data from, or a BeautifulSoup object.
+
 ```return```: A list containing all the movie's cast, not only actors.
 
 ### ```get_movie_roles(movie_name)```
