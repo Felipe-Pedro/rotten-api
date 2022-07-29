@@ -40,4 +40,5 @@ It makes a request to the Rotten Tomatoes server and returns the movie's html pa
 
 ### ```get_movie_roles(movie_name)```
 ```movie_name```: A string containing the movie's name which you want to get the data from, or a BeautifulSoup object.
+
 ```return```: A dict containing the cast as the keys and their roles as the items.
