@@ -10,13 +10,16 @@ def open_link(movie_name, timeout=2):
 def get_movie_page(movie_name):
     return BeautifulSoup(open_link(movie_name), features="html.parser")
 
+def _get_page(movie_name):
+    return get_movie_page(movie_name).find('score-board') if type(movie_name) != type(BeautifulSoup()) else movie_name
+
 def get_movie_score(movie_name):
-    movie_info = get_movie_page(movie_name).find('score-board') if type(movie_name) != type(BeautifulSoup()) else movie_name
+    movie_info = _get_page(movie_name)
 
     return (movie_info['audiencescore'], movie_info['tomatometerscore'])
 
 def get_movie_cast(movie_name):
-    movie_page = get_movie_page(movie_name) if type(movie_name) != type(BeautifulSoup()) else movie_name
+    movie_page = _get_page(movie_name)
     actors_link = movie_page.find_all('span', class_='characters subtle smaller')
     
     return [ actor['title'] for actor in actors_link ]
@@ -33,7 +36,7 @@ def _sanatize(input):
     return clean_pieces
 
 def _roles(movie_name):
-    movie_page = get_movie_page(movie_name) if type(movie_name) != type(BeautifulSoup()) else movie_name
+    movie_page = _get_page(movie_name)
     caracters_link = movie_page.find_all('span', class_='characters subtle smaller')
     
     caracters_stripped_strings = [ string.stripped_strings for string in caracters_link ]
@@ -46,7 +49,7 @@ def _roles(movie_name):
     return roles
 
 def get_movie_roles(movie_name):
-    movie_page = get_movie_page(movie_name)
+    movie_page = _get_page(movie_name)
 
     return {
         actor: role for actor, role in zip(get_movie_cast(movie_page), _roles(movie_page))
