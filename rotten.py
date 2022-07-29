@@ -11,12 +11,13 @@ def get_movie_page(movie_name):
     return BeautifulSoup(open_link(movie_name), features="html.parser")
 
 def _get_page(movie_name):
-    return get_movie_page(movie_name).find('score-board') if type(movie_name) != type(BeautifulSoup()) else movie_name
+    return get_movie_page(movie_name) if type(movie_name) != type(BeautifulSoup()) else movie_name
 
 def get_movie_score(movie_name):
-    movie_info = _get_page(movie_name)
+    movie_page = _get_page(movie_name)
+    movie_score = movie_page.find('score-board')
 
-    return (movie_info['audiencescore'], movie_info['tomatometerscore'])
+    return (movie_score['audiencescore'], movie_score['tomatometerscore'])
 
 def get_movie_cast(movie_name):
     movie_page = _get_page(movie_name)
@@ -54,3 +55,23 @@ def get_movie_roles(movie_name):
     return {
         actor: role for actor, role in zip(get_movie_cast(movie_page), _roles(movie_page))
     }
+
+def get_movie_synopsis(movie_name):
+    movie_page = _get_page(movie_name)
+
+    return movie_page.find('div', id='movieSynopsis').string.strip()
+
+def get_movie_info(movie_name):
+    movie_page = _get_page(movie_name)
+
+    labels = movie_page.find_all('div', attrs={
+        'data-qa': 'movie-info-item-label'
+    })
+
+    values = movie_page.find_all('div', attrs={
+        'data-qa': 'movie-info-item-value'
+    })
+
+    print({
+        label.string: value.string for label, value in zip(labels, values)
+    })
