@@ -27,7 +27,13 @@ It will be available on pip soon but until than you can do a clone from this rep
 
 ## Notes
 
-All functions, except ```py open_link(movie_name) ``` and ```python get_movie_page(movie_name) ```, can receive a BeautifulSoup object containing the Rotten movie's page as the movie_name parameter, so you can make only one request to Rotten and parse the information as you need, otherwise it will make the request each time you call a function.
+All functions, except ```py 
+                        open_link(movie_name) 
+                        ``` and 
+                        ```python 
+                        get_movie_page(movie_name) 
+                        ```
+                        , can receive a BeautifulSoup object containing the Rotten movie's page as the movie_name parameter, so you can make only one request to Rotten and parse the information as you need, otherwise it will make the request each time you call a function.
 
 ### ```python open_link(movie_name, timeout=2) ```
 ```python movie_name```: A string containing the movie's name which you want to get the data from.
